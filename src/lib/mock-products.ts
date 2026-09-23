@@ -1,4 +1,4 @@
-import { Product, VoucherCoupon, ShippingCity, CourierOption } from '@/types/commerce';
+import { Product, VoucherCoupon } from '@/types/commerce';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
@@ -182,20 +182,4 @@ export const AVAILABLE_VOUCHERS: VoucherCoupon[] = [
     discountValue: 250000,
     minSpend: 2500000,
   },
-];
-
-export const CITIES_DATABASE: ShippingCity[] = [
-  { id: 'city-1', name: 'Jakarta Selatan', province: 'DKI Jakarta', zone: 'JABODETABEK' },
-  { id: 'city-2', name: 'Kota Bandung', province: 'Jawa Barat', zone: 'JAWA' },
-  { id: 'city-3', name: 'Kota Surabaya', province: 'Jawa Timur', zone: 'JAWA' },
-  { id: 'city-4', name: 'Kota Medan', province: 'Sumatera Utara', zone: 'LUAR_JAWA' },
-  { id: 'city-5', name: 'Kota Makassar', province: 'Sulawesi Selatan', zone: 'LUAR_JAWA' },
-  { id: 'city-6', name: 'Kota Denpasar', province: 'Bali', zone: 'LUAR_JAWA' },
-];
-
-export const COURIERS_DATABASE: CourierOption[] = [
-  { code: 'JNE_REG', name: 'JNE Express', service: 'Reguler (2-3 Hari)', baseRatePerKg: 12000, etd: '2-3 Hari' },
-  { code: 'JNE_YES', name: 'JNE Express', service: 'Yakin Esok Sampai (YES)', baseRatePerKg: 24000, etd: '1 Hari' },
-  { code: 'JNT_STD', name: 'J&T Express', service: 'EZ Reguler', baseRatePerKg: 11000, etd: '2-3 Hari' },
-  { code: 'SICEPAT_BEST', name: 'SiCepat Ekspres', service: 'BEST (Besok Sampai)', baseRatePerKg: 22000, etd: '1 Hari' },
 ];

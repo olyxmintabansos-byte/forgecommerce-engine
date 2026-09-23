@@ -5,14 +5,20 @@ import { Navbar } from '@/components/layout/Navbar';
 import { HeroBanner } from '@/components/storefront/HeroBanner';
 import { ProductGrid } from '@/components/storefront/ProductGrid';
 import { QuickCartDrawer } from '@/components/cart/QuickCartDrawer';
+import { CheckoutModal } from '@/components/checkout/CheckoutModal';
+import { OrderSuccessModal } from '@/components/checkout/OrderSuccessModal';
 import { StorageEngine } from '@/lib/storage';
-import { Product, CartItem, VoucherCoupon } from '@/types/commerce';
-import { CheckCircle2, ShieldCheck, Truck, RefreshCcw, Headphones } from 'lucide-react';
+import { Product, CartItem, VoucherCoupon, Order } from '@/types/commerce';
+import { CheckCircle2, ShieldCheck, Truck, RefreshCcw, Headphones, PackageCheck } from 'lucide-react';
 
 export default function StorefrontPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+  const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const [appliedVoucher, setAppliedVoucher] = useState<VoucherCoupon | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -34,16 +40,27 @@ export default function StorefrontPage() {
 
   const handleAddToCart = (product: Product) => {
     StorageEngine.addToCart(product, 1);
-    setToastMessage(`✓ ${product.title} ditambahkan ke keranjang belanja!`);
-    setTimeout(() => setToastMessage(null), 3500);
+    setToastMessage(`✓ ${product.title} ditambahkan ke keranjang!`);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleProceedCheckout = (voucher: VoucherCoupon | null) => {
-    alert(
-      voucher
-        ? `Menuju Checkout dengan voucher ${voucher.code}! (Modul Checkout & Ongkir aktif di Sprint berikutnya)`
-        : 'Menuju Checkout! (Modul Checkout & Ongkir aktif di Sprint berikutnya)'
-    );
+    setAppliedVoucher(voucher);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleOrderSuccess = (order: Order) => {
+    // 1. Save to orders history
+    const orders = StorageEngine.getOrders();
+    orders.unshift(order);
+    StorageEngine.saveOrders(orders);
+
+    // 2. Clear shopping cart
+    StorageEngine.clearCart();
+
+    // 3. Open Success Receipt Modal
+    setCompletedOrder(order);
+    setIsSuccessModalOpen(true);
   };
 
   const filteredProducts = products.filter((p) => {
@@ -58,7 +75,7 @@ export default function StorefrontPage() {
   const featuredProduct = products[0] || null;
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100">
       <Navbar
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
@@ -67,7 +84,7 @@ export default function StorefrontPage() {
         setSelectedCategory={setSelectedCategory}
       />
 
-      {/* Toast Alert */}
+      {/* Floating Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-cyan-950 border border-cyan-700 text-cyan-200 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold animate-slide-in-right">
           <CheckCircle2 className="h-4 w-4 text-cyan-400" />
@@ -135,10 +152,26 @@ export default function StorefrontPage() {
         onProceedCheckout={handleProceedCheckout}
       />
 
-      {/* Minimal Footer */}
+      {/* Multi-Step Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        appliedVoucher={appliedVoucher}
+        onOrderSuccess={handleOrderSuccess}
+      />
+
+      {/* Order Confirmation & Electronic Receipt Modal */}
+      <OrderSuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        order={completedOrder}
+      />
+
+      {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-500">
         <p className="font-semibold text-slate-400">FORGECOMMERCE ENGINE v2.0</p>
-        <p className="mt-1">Dirancang untuk Pengalaman Belanja Headless Klien 100% di Browser.</p>
+        <p className="mt-1">Headless Storefront, Shipping Rate Engine & Mock Payment Gateway.</p>
       </footer>
     </div>
   );

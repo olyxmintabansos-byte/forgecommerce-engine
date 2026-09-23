@@ -34,20 +34,23 @@ export interface VoucherCoupon {
   minSpend: number;
 }
 
-export interface ShippingCity {
+export interface DestinationCity {
   id: string;
   name: string;
   province: string;
   zone: 'JABODETABEK' | 'JAWA' | 'LUAR_JAWA';
 }
 
-export interface CourierOption {
-  code: string;
-  name: string;
-  service: string;
-  baseRatePerKg: number;
+export interface ShippingOption {
+  id: string;
+  courierCode: 'JNE' | 'JNT' | 'SICEPAT' | 'GOSEND';
+  courierName: string;
+  serviceName: string;
   etd: string;
+  cost: number;
 }
+
+export type PaymentMethodType = 'BCA_VA' | 'MANDIRI_VA' | 'BRI_VA' | 'QRIS' | 'GOPAY' | 'SHOPEEPAY';
 
 export interface OrderItem {
   productId: string;
@@ -55,6 +58,7 @@ export interface OrderItem {
   price: number;
   quantity: number;
   image: string;
+  weightKg: number;
 }
 
 export interface OrderShipment {
@@ -75,16 +79,20 @@ export interface Order {
   orderNumber: string;
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
   destinationCity: string;
   address: string;
+  postalCode: string;
   items: OrderItem[];
   subtotal: number;
-  discount: number;
+  voucherDiscount: number;
+  voucherCode?: string;
   shippingFee: number;
   totalAmount: number;
-  paymentMethod: 'BCA_VA' | 'MANDIRI_VA' | 'QRIS' | 'GOPAY';
+  paymentMethod: PaymentMethodType;
   paymentStatus: 'UNPAID' | 'PAID';
   vaNumber?: string;
+  paidAt?: string;
   shipment: OrderShipment;
   createdAt: string;
 }

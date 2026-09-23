@@ -240,7 +240,10 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
 
             {/* Checkout Action */}
             <button
-              onClick={() => onProceedCheckout(appliedVoucher)}
+              onClick={() => {
+                onProceedCheckout(appliedVoucher);
+                onClose();
+              }}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition-all"
             >
               <span>Lanjut ke Pengiriman & Pembayaran</span>
