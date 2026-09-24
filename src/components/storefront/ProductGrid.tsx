@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ArrowUpDown, SlidersHorizontal, Package } from 'lucide-react';
+import { ArrowUpDown, Package } from 'lucide-react';
 import { Product } from '@/types/commerce';
 import { ProductCard } from './ProductCard';
 
@@ -22,12 +22,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     if (sortBy === 'CHEAPEST') return a.price - b.price;
     if (sortBy === 'PRICIEST') return b.price - a.price;
     if (sortBy === 'DISCOUNT') return b.discountPercent - a.discountPercent;
-    return b.reviewsCount - a.reviewsCount; // Popular
+    return b.reviewsCount - a.reviewsCount;
   });
 
   return (
     <div className="space-y-6">
-      {/* Section Header & Sorter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -59,7 +58,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       </div>
 
-      {/* Grid */}
       {sortedProducts.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-500 space-y-2">
           <Package className="h-10 w-10 mx-auto text-slate-700" />

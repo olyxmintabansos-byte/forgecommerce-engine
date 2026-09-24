@@ -1,4 +1,4 @@
-import { Product, CartItem, Order, VoucherCoupon, OrderShipment } from '@/types/commerce';
+import { Product, CartItem, Order, VoucherCoupon, OrderShipment, FlashSaleSettings } from '@/types/commerce';
 import { INITIAL_PRODUCTS, AVAILABLE_VOUCHERS } from './mock-products';
 
 const STORAGE_KEYS = {
@@ -6,6 +6,14 @@ const STORAGE_KEYS = {
   CART: 'forgecommerce_cart_v1',
   ORDERS: 'forgecommerce_orders_v1',
   VOUCHERS: 'forgecommerce_vouchers_v1',
+  FLASH_SALE: 'forgecommerce_flash_sale_v1',
+};
+
+const DEFAULT_FLASH_SALE: FlashSaleSettings = {
+  title: 'Tingkatkan Stasiun Kerja Anda ke Level Tertinggi',
+  subtitle: 'Perangkat keras pilihan arsitek dan insinyur piranti lunak. Keyboard mekanik gasket akustik creamy, standing desk dual-motor, dan audio presisi tinggi.',
+  discountHeadline: 'Flash Sale Hari Ini',
+  endsAt: new Date(Date.now() + 1000 * 60 * 60 * 12).toISOString(),
 };
 
 export const StorageEngine = {
@@ -27,6 +35,11 @@ export const StorageEngine = {
     if (typeof window === 'undefined') return;
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
     window.dispatchEvent(new Event('forge_products_updated'));
+  },
+
+  deleteProduct(productId: string): void {
+    const products = this.getProducts().filter((p) => p.id !== productId);
+    this.saveProducts(products);
   },
 
   getCart(): CartItem[] {
@@ -81,7 +94,6 @@ export const StorageEngine = {
     if (typeof window === 'undefined') return [];
     const raw = localStorage.getItem(STORAGE_KEYS.ORDERS);
     if (!raw) {
-      // Seed with initial sample order for instant testability
       const sampleOrders: Order[] = [
         {
           id: 'ord-demo-01',
@@ -172,6 +184,26 @@ export const StorageEngine = {
     this.saveOrders(orders);
   },
 
+  getFlashSaleSettings(): FlashSaleSettings {
+    if (typeof window === 'undefined') return DEFAULT_FLASH_SALE;
+    const raw = localStorage.getItem(STORAGE_KEYS.FLASH_SALE);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEYS.FLASH_SALE, JSON.stringify(DEFAULT_FLASH_SALE));
+      return DEFAULT_FLASH_SALE;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return DEFAULT_FLASH_SALE;
+    }
+  },
+
+  saveFlashSaleSettings(settings: FlashSaleSettings): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.FLASH_SALE, JSON.stringify(settings));
+    window.dispatchEvent(new Event('forge_flash_sale_updated'));
+  },
+
   getVouchers(): VoucherCoupon[] {
     return AVAILABLE_VOUCHERS;
   },
@@ -179,6 +211,7 @@ export const StorageEngine = {
   resetAll(): void {
     if (typeof window === 'undefined') return;
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+    localStorage.setItem(STORAGE_KEYS.FLASH_SALE, JSON.stringify(DEFAULT_FLASH_SALE));
     localStorage.removeItem(STORAGE_KEYS.CART);
     localStorage.removeItem(STORAGE_KEYS.ORDERS);
     window.location.reload();

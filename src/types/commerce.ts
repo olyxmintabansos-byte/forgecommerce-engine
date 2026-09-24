@@ -96,3 +96,11 @@ export interface Order {
   shipment: OrderShipment;
   createdAt: string;
 }
+
+
+export interface FlashSaleSettings {
+  title: string;
+  subtitle: string;
+  discountHeadline: string;
+  endsAt: string;
+}
