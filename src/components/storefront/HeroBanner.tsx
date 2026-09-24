@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Flame, Sparkles, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Flame, Sparkles, ArrowRight, ShieldCheck, Zap, Star } from 'lucide-react';
 import { Product } from '@/types/commerce';
+import { toast } from '@/lib/toast';
 
 interface HeroBannerProps {
   featuredProduct: Product;
@@ -11,9 +12,9 @@ interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ featuredProduct, onAddToCart }) => {
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 8,
-    minutes: 42,
-    seconds: 15,
+    hours: 7,
+    minutes: 38,
+    seconds: 42,
   });
 
   useEffect(() => {
@@ -28,18 +29,30 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ featuredProduct, onAddTo
     return () => clearInterval(timer);
   }, []);
 
+  const handleHeroAdd = () => {
+    onAddToCart(featuredProduct);
+    toast.success(`"${featuredProduct.title}" berhasil ditambahkan!`, 'Flash Sale Berhasil Diambil');
+  };
+
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 border border-slate-800 p-6 sm:p-10 shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-emerald-950/40 border border-slate-800 p-6 sm:p-10 shadow-2xl">
+      {/* Background glow orbs */}
+      <div className="absolute -top-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Left Column */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/80 text-cyan-400 text-xs font-bold flex items-center gap-1.5 uppercase tracking-wider">
-              <Zap className="h-3.5 w-3.5 fill-cyan-400" />
-              <span>Flash Sale Hari Ini</span>
+        <div className="lg:col-span-7 space-y-5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-black flex items-center gap-1.5 uppercase tracking-wider shadow-lg shadow-emerald-950/50">
+              <Zap className="h-3.5 w-3.5 fill-slate-950" />
+              <span>FLASH SALE EKSKLUSIF</span>
             </span>
-            <div className="flex items-center gap-1.5 text-xs font-mono text-slate-300 bg-slate-900/90 px-3 py-1 rounded-full border border-slate-800">
-              <span className="text-rose-400 font-bold">Berakhir dalam:</span>
+
+            <div className="flex items-center gap-1.5 text-xs font-mono text-slate-200 bg-slate-900/90 px-3.5 py-1 rounded-full border border-slate-800">
+              <span className="text-rose-400 font-bold flex items-center gap-1">
+                <Flame className="h-3.5 w-3.5 fill-rose-500 text-rose-500" /> Berakhir Dalam:
+              </span>
               <span className="px-1.5 py-0.5 rounded bg-slate-950 text-white font-bold">
                 {String(timeLeft.hours).padStart(2, '0')}
               </span>
@@ -48,41 +61,42 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ featuredProduct, onAddTo
                 {String(timeLeft.minutes).padStart(2, '0')}
               </span>
               :
-              <span className="px-1.5 py-0.5 rounded bg-slate-950 text-cyan-400 font-bold">
+              <span className="px-1.5 py-0.5 rounded bg-slate-950 text-emerald-400 font-bold">
                 {String(timeLeft.seconds).padStart(2, '0')}
               </span>
             </div>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Tingkatkan Stasiun Kerja Anda ke Level Tertinggi
+            Tingkatkan Setup Kerja Anda ke Tingkat Tertinggi
           </h1>
 
           <p className="text-sm sm:text-base text-slate-400 max-w-xl leading-relaxed">
-            Perangkat keras pilihan arsitek dan insinyur piranti lunak. Keyboard mekanik gasket akustik creamy, standing desk dual-motor, dan audio presisi tinggi.
+            Perangkat keras pilihan arsitek dan insinyur piranti lunak. Keyboard mekanik gasket akustik creamy, standing desk dual-motor, dan audio presisi ultra tinggi.
           </p>
 
-          <div className="flex items-baseline gap-3 pt-2">
-            <span className="text-3xl font-black text-white font-mono">
+          <div className="flex items-baseline gap-3 pt-1">
+            <span className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono tracking-tight">
               Rp {featuredProduct.price.toLocaleString('id-ID')}
             </span>
             <span className="text-base text-slate-500 line-through font-mono">
               Rp {featuredProduct.originalPrice.toLocaleString('id-ID')}
             </span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300">
+            <span className="text-xs font-black px-2.5 py-1 rounded-full bg-rose-950/90 border border-rose-700 text-rose-300">
               Hemat {featuredProduct.discountPercent}%
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-3">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
-              onClick={() => onAddToCart(featuredProduct)}
-              className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 transition-all shadow-xl shadow-cyan-500/25 active:scale-95"
+              onClick={handleHeroAdd}
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 transition-all shadow-xl shadow-emerald-950/50 active:scale-95"
             >
-              <span>Beli Produk Unggulan</span>
+              <span>Klaim Flash Sale Sekarang</span>
               <ArrowRight className="h-4 w-4" />
             </button>
-            <div className="flex items-center gap-2 text-xs text-slate-400 px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+
+            <div className="flex items-center gap-2 text-xs text-slate-300 px-3.5 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
               <span>Garansi Resmi 2 Tahun Ganti Baru</span>
             </div>
@@ -92,20 +106,27 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ featuredProduct, onAddTo
         {/* Right Column: Hero Showcase Image */}
         <div className="lg:col-span-5 flex justify-center">
           <div className="relative group">
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cyan-500 to-indigo-600 opacity-30 blur-xl group-hover:opacity-50 transition duration-500" />
-            <img
-              src={featuredProduct.image}
-              alt={featuredProduct.title}
-              className="relative w-full max-w-md h-72 sm:h-80 object-cover rounded-2xl border border-slate-700 shadow-2xl"
-            />
-            <div className="absolute bottom-4 left-4 right-4 bg-slate-950/80 backdrop-blur-md p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-white truncate">{featuredProduct.title}</p>
-                <p className="text-[11px] text-cyan-400">Rating {featuredProduct.rating} ★ ({featuredProduct.reviewsCount} review)</p>
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-30 blur-2xl group-hover:opacity-50 transition duration-700" />
+            <div className="relative rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl bg-slate-950">
+              <img
+                src={featuredProduct.image}
+                alt={featuredProduct.title}
+                className="w-full max-w-md h-72 sm:h-84 object-cover group-hover:scale-105 transition duration-700"
+              />
+              <div className="absolute bottom-3 left-3 right-3 p-3 rounded-2xl bg-slate-950/85 backdrop-blur-md border border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
+                    {featuredProduct.category}
+                  </span>
+                  <span className="text-xs font-bold text-white block truncate max-w-[200px]">
+                    {featuredProduct.title}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
+                  <Star className="h-3.5 w-3.5 fill-amber-400" />
+                  <span>{featuredProduct.rating}</span>
+                </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
-                Tersisa {featuredProduct.stock} Unit
-              </span>
             </div>
           </div>
         </div>

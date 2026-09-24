@@ -71,6 +71,11 @@ export const StorageEngine = {
     this.saveCart(cart);
   },
 
+  removeFromCart(productId: string): void {
+    const cart = this.getCart().filter((item) => item.product.id !== productId);
+    this.saveCart(cart);
+  },
+
   updateCartQuantity(productId: string, quantity: number): void {
     let cart = this.getCart();
     if (quantity <= 0) {
