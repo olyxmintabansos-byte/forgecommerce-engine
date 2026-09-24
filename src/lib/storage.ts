@@ -1,4 +1,4 @@
-import { Product, CartItem, Order, VoucherCoupon } from '@/types/commerce';
+import { Product, CartItem, Order, VoucherCoupon, OrderShipment } from '@/types/commerce';
 import { INITIAL_PRODUCTS, AVAILABLE_VOUCHERS } from './mock-products';
 
 const STORAGE_KEYS = {
@@ -80,7 +80,61 @@ export const StorageEngine = {
   getOrders(): Order[] {
     if (typeof window === 'undefined') return [];
     const raw = localStorage.getItem(STORAGE_KEYS.ORDERS);
-    if (!raw) return [];
+    if (!raw) {
+      // Seed with initial sample order for instant testability
+      const sampleOrders: Order[] = [
+        {
+          id: 'ord-demo-01',
+          orderNumber: 'ORD-2026-9812',
+          customerName: 'Bima Satria',
+          customerPhone: '081288991122',
+          customerEmail: 'bima.satria@forge.io',
+          destinationCity: 'Kota Bandung',
+          address: 'Jl. Riau No. 45, Citarum, Bandung Wetan',
+          postalCode: '40115',
+          items: [
+            {
+              productId: 'prod-01',
+              title: 'Forge Apex Pro 75% Wireless Mechanical Keyboard',
+              price: 1850000,
+              quantity: 1,
+              image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?w=800&auto=format&fit=crop&q=80',
+              weightKg: 1.2,
+            },
+          ],
+          subtotal: 1850000,
+          voucherDiscount: 100000,
+          voucherCode: 'HEMAT100K',
+          shippingFee: 16000,
+          totalAmount: 1766000,
+          paymentMethod: 'BCA_VA',
+          paymentStatus: 'PAID',
+          paidAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+          shipment: {
+            courierName: 'JNE Express',
+            service: 'Reguler (2-3 Hari)',
+            trackingNumber: 'JP9823145621',
+            shippingFee: 16000,
+            status: 'PROCESSED',
+            history: [
+              {
+                timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
+                description: 'Pesanan telah dibayar via BCA Virtual Account',
+                location: 'Payment Gateway Midtrans',
+              },
+              {
+                timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+                description: 'Penjual sedang mengemas pesanan dengan bubble wrap ganda',
+                location: 'Warehouse Hub Jakarta Selatan',
+              },
+            ],
+          },
+          createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+        },
+      ];
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(sampleOrders));
+      return sampleOrders;
+    }
     try {
       return JSON.parse(raw);
     } catch {
@@ -92,6 +146,30 @@ export const StorageEngine = {
     if (typeof window === 'undefined') return;
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     window.dispatchEvent(new Event('forge_orders_updated'));
+  },
+
+  updateOrderStatus(orderId: string, newStatus: OrderShipment['status'], logDescription?: string): void {
+    const orders = this.getOrders();
+    const target = orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+    if (!target) return;
+
+    target.shipment.status = newStatus;
+
+    const defaultLogs: Record<OrderShipment['status'], { desc: string; loc: string }> = {
+      PENDING: { desc: 'Menunggu konfirmasi pembayaran', loc: 'Payment Gateway' },
+      PROCESSED: { desc: 'Penjual sedang mengemas barang di Gudang', loc: 'Gudang Jakarta Selatan' },
+      SHIPPED: { desc: 'Paket diserahkan ke kurir & dalam perjalanan menuju Sorting Hub', loc: 'Hub Logistik Ekspedisi' },
+      DELIVERED: { desc: 'Paket telah berhasil diterima oleh penerima / pihak keluarga', loc: target.destinationCity },
+    };
+
+    const log = defaultLogs[newStatus];
+    target.shipment.history.unshift({
+      timestamp: new Date().toISOString(),
+      description: logDescription || log.desc,
+      location: log.loc,
+    });
+
+    this.saveOrders(orders);
   },
 
   getVouchers(): VoucherCoupon[] {

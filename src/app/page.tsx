@@ -7,16 +7,20 @@ import { ProductGrid } from '@/components/storefront/ProductGrid';
 import { QuickCartDrawer } from '@/components/cart/QuickCartDrawer';
 import { CheckoutModal } from '@/components/checkout/CheckoutModal';
 import { OrderSuccessModal } from '@/components/checkout/OrderSuccessModal';
+import { ShipmentTrackerModal } from '@/components/tracking/ShipmentTrackerModal';
+import { SellerCenterView } from '@/components/seller/SellerCenterView';
 import { StorageEngine } from '@/lib/storage';
 import { Product, CartItem, VoucherCoupon, Order } from '@/types/commerce';
-import { CheckCircle2, ShieldCheck, Truck, RefreshCcw, Headphones, PackageCheck } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Truck, RefreshCcw, Headphones } from 'lucide-react';
 
 export default function StorefrontPage() {
+  const [currentView, setCurrentView] = useState<'storefront' | 'seller'>('storefront');
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+  const [isTrackerOpen, setIsTrackerOpen] = useState<boolean>(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherCoupon | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -50,15 +54,10 @@ export default function StorefrontPage() {
   };
 
   const handleOrderSuccess = (order: Order) => {
-    // 1. Save to orders history
     const orders = StorageEngine.getOrders();
     orders.unshift(order);
     StorageEngine.saveOrders(orders);
-
-    // 2. Clear shopping cart
     StorageEngine.clearCart();
-
-    // 3. Open Success Receipt Modal
     setCompletedOrder(order);
     setIsSuccessModalOpen(true);
   };
@@ -78,6 +77,9 @@ export default function StorefrontPage() {
     <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100">
       <Navbar
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenTracker={() => setIsTrackerOpen(true)}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         selectedCategory={selectedCategory}
@@ -92,57 +94,61 @@ export default function StorefrontPage() {
         </div>
       )}
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 space-y-10 w-full">
-        {featuredProduct && (
-          <HeroBanner
-            featuredProduct={featuredProduct}
+      {/* VIEW CONDITIONAL: STOREFRONT VS SELLER CENTER */}
+      {currentView === 'storefront' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 space-y-10 w-full">
+          {featuredProduct && (
+            <HeroBanner
+              featuredProduct={featuredProduct}
+              onAddToCart={handleAddToCart}
+            />
+          )}
+
+          {/* Feature Value Props */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-4 border-y border-slate-900">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
+              <Truck className="h-5 w-5 text-cyan-400 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white">Ekspedisi Nusantara</p>
+                <p className="text-[10px] text-slate-500">JNE, J&T, SiCepat Kilat</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
+              <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white">100% Produk Orisinal</p>
+                <p className="text-[10px] text-slate-500">Garansi Resmi 2 Tahun</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
+              <RefreshCcw className="h-5 w-5 text-purple-400 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white">Retur Ganti Baru</p>
+                <p className="text-[10px] text-slate-500">7 Hari Tanpa Ribet</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
+              <Headphones className="h-5 w-5 text-amber-400 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white">Bantuan Teknis 24/7</p>
+                <p className="text-[10px] text-slate-500">Dukungan Tim Ahli</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Catalog Grid */}
+          <ProductGrid
+            products={filteredProducts}
             onAddToCart={handleAddToCart}
+            selectedCategory={selectedCategory}
           />
-        )}
-
-        {/* Feature Value Props */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-4 border-y border-slate-900">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-            <Truck className="h-5 w-5 text-cyan-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-white">Ekspedisi Nusantara</p>
-              <p className="text-[10px] text-slate-500">JNE, J&T, SiCepat Kilat</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-            <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-white">100% Produk Orisinal</p>
-              <p className="text-[10px] text-slate-500">Garansi Resmi 2 Tahun</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-            <RefreshCcw className="h-5 w-5 text-purple-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-white">Retur Ganti Baru</p>
-              <p className="text-[10px] text-slate-500">7 Hari Tanpa Ribet</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/40 border border-slate-800/60">
-            <Headphones className="h-5 w-5 text-amber-400 shrink-0" />
-            <div>
-              <p className="text-xs font-bold text-white">Bantuan Teknis 24/7</p>
-              <p className="text-[10px] text-slate-500">Dukungan Tim Ahli</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Product Catalog Grid */}
-        <ProductGrid
-          products={filteredProducts}
-          onAddToCart={handleAddToCart}
-          selectedCategory={selectedCategory}
-        />
-      </main>
+        </main>
+      ) : (
+        <SellerCenterView />
+      )}
 
       {/* Quick Cart Slide-out Drawer */}
       <QuickCartDrawer
@@ -166,6 +172,13 @@ export default function StorefrontPage() {
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
         order={completedOrder}
+      />
+
+      {/* Live Resi & Shipment Tracker Modal */}
+      <ShipmentTrackerModal
+        isOpen={isTrackerOpen}
+        onClose={() => setIsTrackerOpen(false)}
+        initialTrackingQuery={completedOrder?.shipment.trackingNumber || 'JP9823145621'}
       />
 
       {/* Footer */}
